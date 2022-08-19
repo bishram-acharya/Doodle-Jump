@@ -1,4 +1,12 @@
+
+
+
+
+
+
+
 #include <iostream>
+
 #include "Game.h"
 
 //using namespace sf;
@@ -14,33 +22,52 @@ int main()
 	//Game loop
 	while (game.running() && !game.getEndGame())
 	{
+		
 		while (game.StartScreen)
 		{
-				game.displayStartScreen();
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
-				{	
-					game.StartScreen = false;
-					game.firstplatforms = true;
-					break;	
-				}
-		}		
-		while(!game.StartScreen)
-		{//Update
-			game.update();
-			if(game.GameOver)
-			{ 
-			  
-			  break;
-			
-			}
-		
-			game.render();
+			game.mainmenu();
+
 		}
-		game.renderGameOver();
+		while(game.agentChoice)
+		{   
+			game.agentmenu();		
+		}
 		
+		if(!game.GameOver)
+		{
 		
+			while(!game.StartScreen)
+			{//Update
+				game.update();
+				if(game.GameOver)
+				{ 
+			  		break;
+			
+				}
+				game.render();
+			}
+		}
+		if(game.GameOver)
+		{
+			
+			game.purgatory();
+		}
 	}
 
 	//End of application
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
