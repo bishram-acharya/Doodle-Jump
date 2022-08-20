@@ -1,5 +1,4 @@
 
-
 #pragma once
 #include<dos.h>
 #include<iostream>
@@ -48,11 +47,15 @@ private:
     sf::Sound jump_sfx;
     sf::SoundBuffer buffer_jump;
     
+    sf::Sound highscore_sfx;
+    sf::SoundBuffer buffer_highscore;
+    
     
 
 
 	//Game logic
 	bool endGame;
+	bool highscored;
 	
 	int doodle_direction; //1 for right , 0 for left
 
@@ -103,6 +106,7 @@ public:
 	bool GameOver;
 	bool agentChoice;
 	bool isEnemy;
+	
 	unsigned mainmenu_choice;
 	unsigned gameover_choice;
 	int last_generated_plat;
@@ -121,6 +125,7 @@ public:
 	int random_XPosition();
 	int random_YPosition();
 	int agent_type;
+	
 	float enemyposX;
 	float enemyposY;
 	
@@ -162,7 +167,8 @@ public:
 	int positionY();
 	void boundaryMovement();
 	void movePlatX();
-    void moveEnemy();
+	void moveEnemy();
+
 	void mainmenu();
 	void agentmenu();
 	void purgatory();
@@ -173,6 +179,5 @@ public:
 	
 //  void setNewY();	
 };
-
 
 
