@@ -28,7 +28,9 @@ void Game::initVariables()
     this->GameOver=false;
     this->check_Base=true;
     this->agentChoice=false;
-    
+    this->isEnemy=false;
+    float enemyposX=300;
+	float enemyposY=700;
     this->doodle_direction = 1;
     
     this->gameover_choice = 1;
@@ -59,6 +61,9 @@ void Game::resetvariables()
     this->GameOver=false;
     this->check_Base=true;
     this->agentChoice=false;
+    this->isEnemy=false;
+    float enemyposX=300;
+	float enemyposY=700;
     
     this->doodle_direction = 1;
     
@@ -735,12 +740,15 @@ void Game::generatePlat()
 			this->platformY[i] = (this->platformY[this->last_generated_plat]-100-(rand()%50));
 			this->last_generated_plat=i;
 			this->generated_plat_count+=1;
-		    this->difficulty=(this->generated_plat_count*0.15);
+		    this->difficulty=(this->generated_plat_count*0.2);
 		    if(this->difficulty>5)
 		    {
 		    	this->difficulty=4;
 			}
-			
+			if(this->generated_plat_count>20)
+			{this->isEnemy=true;
+			 this->enemyposY=750;
+			}
 			
     	}
   	} 
@@ -855,6 +863,7 @@ void Game::updateDoodle()
 	this->generatePlat();
 	this->movePlatX();  	
 	this->boundaryMovement();
+	this->moveEnemy();
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) // can be replaced by anything
   	{
@@ -863,7 +872,27 @@ void Game::updateDoodle()
     	this->gameover_sfx.play();
   	}
 }
-
+void Game::moveEnemy()
+{
+	this->enemyposX=this->new_pos_x;
+	this->enemyposY=this->enemyposY-1;
+	if(this->isEnemy)
+		{
+		if(this->enemyposY<(this->new_pos_y)+50)
+		{
+		this->GameOver = true;
+    	this->pausemusic();
+    	this->gameover_sfx.play();
+		}
+		
+		}
+	
+	
+	
+	
+	
+	
+}
 
 
 int Game::random_XPosition()
@@ -955,8 +984,39 @@ void Game::renderDoodle()
     	sf::Sprite s9(t9);
     	s9.setPosition(this->new_pos_x, new_pos_y);
     	this->window->draw(s9);
-	}    
+	} 
+	   
 
+}
+
+void Game::renderEnemy()
+{
+	  sf::Texture t99;
+	  if( this->agent_type==1 )
+	  {
+	  	
+	  	t99.loadFromFile("images/gunda_right.png");
+	  	
+	  	
+	  }
+	  
+	  if(this->agent_type==2)
+	  {
+	  	
+	  	t99.loadFromFile("images/doodle_right.png");
+	  	
+	  	
+	  }
+	  
+	  
+	 sf::Sprite s99(t99);
+	 s99.setPosition(this->enemyposX, this->enemyposY-1);
+     this->window->draw(s99);
+	  
+	
+	
+	
+	
 }
 void Game::renderBackground()
 {
@@ -1124,6 +1184,12 @@ void Game::render()
 	this->renderPlatform();
 	this->renderScoreboard();
 	this->renderDoodle();
+	if(this->isEnemy)
+	{
+		
+		this->renderEnemy();
+		
+	}
 	
 	
 
