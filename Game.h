@@ -113,6 +113,7 @@ public:
 	int random;
 	int generated_plat_count;
 	int difficulty;
+	int increment_factor;
 	
 	//Accessors
 	const bool running() const;
@@ -125,6 +126,7 @@ public:
 	int random_XPosition();
 	int random_YPosition();
 	int agent_type;
+	
 	
 	float enemyposX;
 	float enemyposY;
