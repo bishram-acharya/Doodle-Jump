@@ -3,6 +3,33 @@
 #include "Game.h"
 #include <random>
 #include <ctime>
+//Constructors / Destructors
+Game::Game()
+{   
+	this->initCoordinatevariables();
+	
+	this->initVariables();
+	this->initWindow();
+	this->initSounds();
+	
+//	this->initFonts();
+//	this->initText();
+	
+    this->initBackground();
+    this->initDoodle();
+}
+//Game::Game(float b){
+//	
+//	last_pos=b;
+//	new_pos=last_pos+200;
+//}
+
+Game::~Game()
+{
+	delete this->window;
+}
+
+
 //Private functions
 
 void Game::initCoordinatevariables()
@@ -28,15 +55,20 @@ void Game::initVariables()
     this->GameOver=false;
     this->check_Base=true;
     this->agentChoice=false;
-    this->isEnemy=false;
-    float enemyposX=300;
-	float enemyposY=700;
+    this->highscored = false;
+
+    
+    this->isEnemy = false;
+    float enemyposX = 600;
+    float enemyposY = 0;
+    
     this->doodle_direction = 1;
     
     this->gameover_choice = 1;
 	this->mainmenu_choice = 1;
     this->agent_type = 1;
     this->nop = 8;
+    this->increment_factor=7;
     this->level_plat_count=0;
     this->score = 0;
     this->firstjump = false;
@@ -61,9 +93,11 @@ void Game::resetvariables()
     this->GameOver=false;
     this->check_Base=true;
     this->agentChoice=false;
-    this->isEnemy=false;
-    float enemyposX=300;
-	float enemyposY=700;
+    this->isEnemy = false;
+    float enemyposX = 300;
+    float enemyposY = 0;
+    this->increment_factor=7;
+    this->highscored = false;
     
     this->doodle_direction = 1;
     
@@ -105,7 +139,8 @@ void Game::getHighscore()
 	}
 	catch(int x)
 	{
-		this->highscore = 0;		
+		this->highscore = 0;	
+		this->highscored = true;	
 		std::ofstream scorefile;
 		scorefile.open("highscore.dat", std::ios::binary);
 		scorefile.write(reinterpret_cast<char*>(&highscore),sizeof(highscore));
@@ -120,12 +155,10 @@ void Game::initWindow()
 	this->videoMode.height = 800;
 	this->videoMode.width = 600;
 	
-	this->window = new sf::RenderWindow(this->videoMode, "Game 1", sf::Style::Titlebar | sf::Style::Close);
+	this->window = new sf::RenderWindow(this->videoMode, "Futta Mathi", sf::Style::Titlebar | sf::Style::Close);
 
 	this->window->setFramerateLimit(240);
-	
-	this->initSounds();
-	
+		
 }
 
 void Game::initSounds()
@@ -156,6 +189,10 @@ void Game::initSounds()
 	this->jump_sfx.setLoop(false);
 	this->jump_sfx.setVolume(50);	
 	
+	this->buffer_highscore.loadFromFile("audio/highscore.ogg");
+	this->highscore_sfx.setBuffer(buffer_highscore);
+	this->highscore_sfx.setLoop(false);
+	this->highscore_sfx.setVolume(70);
 }
 
 void Game::initBackground()
@@ -195,29 +232,6 @@ void Game::initDoodle()
 //	
 //}
 
-//Constructors / Destructors
-Game::Game()
-{   
-	this->initCoordinatevariables();
-	
-	this->initVariables();
-	this->initWindow();
-//	this->initFonts();
-//	this->initText();
-	
-    this->initBackground();
-    this->initDoodle();
-}
-//Game::Game(float b){
-//	
-//	last_pos=b;
-//	new_pos=last_pos+200;
-//}
-
-Game::~Game()
-{
-	delete this->window;
-}
 
 
 //Accessors
@@ -255,12 +269,12 @@ void Game::pollEvents()
 			if (this->ev.key.code == sf::Keyboard::Left)
 			{
 				this->doodle_direction = 0;
-				this->new_pos_x -= 6;
+				this->new_pos_x -= 10;
 			}
 			if (this->ev.key.code == sf::Keyboard::Right)
 			{
 				this->doodle_direction = 1;
-				this->new_pos_x += 6;
+				this->new_pos_x += 10;
 			}
 			
 			if (this->ev.key.code == sf::Keyboard::P)
@@ -456,8 +470,10 @@ void Game::mainmenu()
 						this->endGame = true;
 						this->closewindow();
 					}
+			this->window->clear();
 				
-				}
+		}
+		
 }
 
 void Game::agentmenu()
@@ -506,6 +522,7 @@ void Game::agentmenu()
 						this->endGame = true;
 						this->closewindow();
 					}
+					this->window->clear();
 				
 				}
 }
@@ -670,6 +687,8 @@ void Game::movePlatY()
     	for(int i=0;i< nop;i++)
     	{		   
     		this->platformY[i]+=dpy;
+            this->increment_factor=13;
+            
 	    
 		}
 	}
@@ -678,6 +697,7 @@ void Game::movePlatY()
 		count =0;
 		change=1;
 		dpy=0;
+		this->increment_factor=7;
 	}
 	 this->checkBase();
 	
@@ -690,7 +710,7 @@ void Game::movePlatX()
 	{ 
 		if(this->movement_check[i]==1)
 		{	
-			this->platformX[i]+=(this->plat_velocityX[i]*(this->difficulty+1));
+			this->platformX[i]+=(this->plat_velocityX[i]*2*(this->difficulty+1));
  			if(this->platformX[i]<0||this->platformX[i]>480)
  			{
  			 	this->plat_velocityX[i] *=-1;
@@ -706,8 +726,11 @@ void Game::updateScores()
 {
 	this->score += 20;
 	if(this->score > this->highscore)
-	{
+	{   
+		if(this->highscored == false)
+			this->highscore_sfx.play();
 		this->highscore = this->score;
+		this->highscored = true;
 		std::ofstream scorefile;
 		scorefile.open("highscore.dat", std::ios::binary);
 		scorefile.write(reinterpret_cast<char*>(&highscore),sizeof(highscore));
@@ -740,15 +763,23 @@ void Game::generatePlat()
 			this->platformY[i] = (this->platformY[this->last_generated_plat]-100-(rand()%50));
 			this->last_generated_plat=i;
 			this->generated_plat_count+=1;
-		    this->difficulty=(this->generated_plat_count*0.2);
+		    this->difficulty=(this->generated_plat_count*0.15);
 		    if(this->difficulty>5)
 		    {
 		    	this->difficulty=4;
 			}
-			if(this->generated_plat_count>20)
-			{this->isEnemy=true;
-			 this->enemyposY=750;
+			
+			if(this->generated_plat_count > 20)
+			{
+				this->isEnemy = true;
+				if(this->generated_plat_count < 22)
+				{
+					this->enemyposY=0;
+				}
+				
 			}
+			
+			
 			
     	}
   	} 
@@ -872,28 +903,26 @@ void Game::updateDoodle()
     	this->gameover_sfx.play();
   	}
 }
+
 void Game::moveEnemy()
 {
-	this->enemyposX=this->new_pos_x;
-	this->enemyposY=this->enemyposY-1;
+	
+	this->enemyposY = this->enemyposY + this->increment_factor;;
 	if(this->isEnemy)
+	{
+		if(this->enemyposY > (this->new_pos_y + 10)&&this->enemyposY < (this->new_pos_y + 100)&&(this->enemyposX>(new_pos_x))&&(this->enemyposX<(new_pos_x+60)))
 		{
-		if(this->enemyposY<(this->new_pos_y)+50)
-		{
-		this->GameOver = true;
-    	this->pausemusic();
-    	this->gameover_sfx.play();
+			this->GameOver = true;
+			this->pausemusic();
+			this->gameover_sfx.play();
 		}
-		
-		}
-	
-	
-	
-	
-	
-	
+	}
+	if(this->enemyposY>800)
+	{
+	 this->enemyposY=0;
+	 this->enemyposX=rand()%520;
+	}
 }
-
 
 int Game::random_XPosition()
 {
@@ -984,39 +1013,17 @@ void Game::renderDoodle()
     	sf::Sprite s9(t9);
     	s9.setPosition(this->new_pos_x, new_pos_y);
     	this->window->draw(s9);
-	} 
-	   
+	}    
 
 }
 
 void Game::renderEnemy()
 {
-	  sf::Texture t99;
-	  if( this->agent_type==1 )
-	  {
-	  	
-	  	t99.loadFromFile("images/gunda_right.png");
-	  	
-	  	
-	  }
-	  
-	  if(this->agent_type==2)
-	  {
-	  	
-	  	t99.loadFromFile("images/doodle_right.png");
-	  	
-	  	
-	  }
-	  
-	  
-	 sf::Sprite s99(t99);
-	 s99.setPosition(this->enemyposX, this->enemyposY-1);
-     this->window->draw(s99);
-	  
-	
-	
-	
-	
+	sf::Texture t99;
+	t99.loadFromFile("images/rocket.png");
+	sf::Sprite s99(t99);
+	s99.setPosition(this->enemyposX, this->enemyposY - 1);
+	this->window->draw(s99);	
 }
 void Game::renderBackground()
 {
@@ -1186,12 +1193,8 @@ void Game::render()
 	this->renderDoodle();
 	if(this->isEnemy)
 	{
-		
 		this->renderEnemy();
-		
 	}
-	
-	
 
 	this->window->display();
 }
@@ -1242,5 +1245,4 @@ void Game::displayAgentSelect()
     this->window->display();
 		
 }
-
 
