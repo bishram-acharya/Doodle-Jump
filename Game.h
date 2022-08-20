@@ -102,6 +102,7 @@ public:
 	bool firstrender;
 	bool GameOver;
 	bool agentChoice;
+	bool isEnemy;
 	unsigned mainmenu_choice;
 	unsigned gameover_choice;
 	int last_generated_plat;
@@ -120,6 +121,8 @@ public:
 	int random_XPosition();
 	int random_YPosition();
 	int agent_type;
+	float enemyposX;
+	float enemyposY;
 	
 	void playmusic();
 	void pausemusic();
@@ -134,6 +137,7 @@ public:
 	void renderPlatform();
 	void renderDoodle();
 	void renderGameOver();
+	void renderEnemy();
 	
 	void renderScoreboard();
 	void renderScoreTitle();
@@ -158,7 +162,7 @@ public:
 	int positionY();
 	void boundaryMovement();
 	void movePlatX();
-
+    void moveEnemy();
 	void mainmenu();
 	void agentmenu();
 	void purgatory();
